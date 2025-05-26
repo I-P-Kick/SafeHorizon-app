@@ -1,0 +1,270 @@
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ShieldCheck, Mail, MessageCircle, Menu, User, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
+
+// Simulated incoming messages
+const incomingMessages = [
+  {
+    id: 1,
+    source: "Email",
+    content: "Your bank account is compromised. Please transfer funds immediately!"
+  },
+  {
+    id: 2,
+    source: "Text Message",
+    content: "Hi grandma, I lost my phone. Please send money to this number."
+  },
+  {
+    id: 3,
+    source: "Email",
+    content: "Reminder: Your dentist appointment is tomorrow at 10 AM."
+  }
+];
+
+const scamIndicators = ["bank", "transfer", "urgent", "password", "money", "compromised"];
+
+const analyzeMessage = (message) => {
+  const isScam = scamIndicators.some((word) =>
+    message.toLowerCase().includes(word)
+  );
+  return isScam
+    ? "⚠️ This message might be a scam. Please be cautious."
+    : "✅ This message appears to be safe.";
+};
+
+export default function SafeHorizonApp() {
+  const [analyzedMessages, setAnalyzedMessages] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [viewProfile, setViewProfile] = useState(false);
+  const [viewHelp, setViewHelp] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [showQuestionBox, setShowQuestionBox] = useState(false);
+  const [reportStatus, setReportStatus] = useState("");
+
+  useEffect(() => {
+    const analyzed = incomingMessages.map((msg) => ({
+      ...msg,
+      result: analyzeMessage(msg.content)
+    }));
+    setAnalyzedMessages(analyzed);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const reportScam = (message) => {
+    setReportStatus("Reporting...");
+    setTimeout(() => {
+      setReportStatus(`✅ Scam message reported to authorities.`);
+      setTimeout(() => setReportStatus(""), 3000);
+    }, 1000);
+  };
+
+  const ProfilePage = () => (
+    <div className="w-full max-w-2xl bg-white p-6 rounded shadow-md border border-blue-100">
+      <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center gap-2">
+        <User className="text-blue-600" /> My Profile
+      </h2>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">Subscription</h3>
+        <p className="text-gray-600">Active — €19,99/month</p>
+      </div>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">Account Details</h3>
+        <p className="text-gray-600">Name: John Doe</p>
+        <p className="text-gray-600">Email: john.doe@example.com</p>
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800">Past Scam Preventions</h3>
+        <ul className="list-disc list-inside text-gray-600">
+          {analyzedMessages
+            .filter((msg) => msg.result.includes("scam"))
+            .map((msg) => (
+              <li key={msg.id}>{msg.content}</li>
+            ))}
+        </ul>
+      </div>
+      <Button
+        className="mt-6 bg-blue-500 text-white hover:bg-blue-600"
+        onClick={() => setViewProfile(false)}
+      >
+        Back to Dashboard
+      </Button>
+    </div>
+  );
+
+  const HelpPage = () => (
+    <div className="w-full max-w-2xl bg-white p-6 rounded shadow-md border border-blue-100">
+      <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center gap-2">
+        <HelpCircle className="text-blue-600" /> Help & Support
+      </h2>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">Contact Information</h3>
+        <p className="text-gray-600">Email: support@safehorizon.com</p>
+        <p className="text-gray-600">Phone: +31 70 123 4567</p>
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Ask a Question</h3>
+        <textarea
+          className="w-full border border-blue-200 rounded p-2 mb-4"
+          placeholder="Type your question here..."
+          rows="4"
+        />
+        <Button className="bg-blue-500 text-white hover:bg-blue-600">
+          Submit
+        </Button>
+      </div>
+      <Button
+        className="mt-6 bg-gray-300 text-gray-800 hover:bg-gray-400"
+        onClick={() => setViewHelp(false)}
+      >
+        Back to Dashboard
+      </Button>
+    </div>
+  );
+
+  const WelcomeScreen = () => (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-white">
+      <motion.h1
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="text-5xl font-bold text-blue-600 mb-4"
+      >
+        SafeHorizon
+      </motion.h1>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
+        className="text-lg text-blue-400"
+      >
+        feel secure all day every day
+      </motion.p>
+    </div>
+  );
+
+  if (showWelcome) {
+    return <WelcomeScreen />;
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center px-4 py-8 relative">
+      {/* Navigation Menu */}
+      <div className="absolute top-4 right-4 z-50">
+        <Button
+          variant="outline"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="p-2"
+        >
+          <Menu className="text-blue-600" />
+        </Button>
+        {menuOpen && (
+          <div className="mt-2 bg-white border border-blue-100 shadow-lg rounded-lg text-sm text-blue-800">
+            <ul className="flex flex-col">
+              <li
+                className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                onClick={() => {
+                  setViewProfile(true);
+                  setViewHelp(false);
+                  setMenuOpen(false);
+                }}
+              >
+                My Profile
+              </li>
+              <li
+                className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                onClick={() => {
+                  setViewHelp(true);
+                  setViewProfile(false);
+                  setMenuOpen(false);
+                }}
+              >
+                Help
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Ask a Question Floating Box */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+          onClick={() => setShowQuestionBox(!showQuestionBox)}
+        >
+          Ask me a question
+        </Button>
+        {showQuestionBox && (
+          <div className="mt-2 bg-white border border-gray-300 rounded shadow-md p-4 w-64">
+            <textarea
+              rows="4"
+              className="w-full border border-blue-200 rounded p-2 mb-2"
+              placeholder="Type your question here..."
+            />
+            <Button className="bg-blue-500 text-white w-full">Submit</Button>
+          </div>
+        )}
+      </div>
+
+      {viewProfile ? (
+        <ProfilePage />
+      ) : viewHelp ? (
+        <HelpPage />
+      ) : (
+        <>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-bold text-blue-600 mb-4"
+          >
+            SafeHorizon
+          </motion.h1>
+          <p className="text-lg text-gray-700 text-center max-w-xl mb-6">
+            Protecting the elderly in The Hague from scams through AI-powered email and text monitoring.
+          </p>
+          <div className="grid gap-4 w-full max-w-2xl">
+            {analyzedMessages.map((msg) => (
+              <Card key={msg.id} className="shadow-md border border-blue-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    {msg.source === "Email" ? <Mail className="text-blue-500" /> : <MessageCircle className="text-blue-500" />}
+                    <h2 className="text-lg font-semibold text-blue-600">{msg.source}</h2>
+                  </div>
+                  <p className="text-gray-800 mb-3">{msg.content}</p>
+                  <div className="p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 mb-2">
+                    <ShieldCheck className="inline-block mr-2" />
+                    {msg.result}
+                  </div>
+                  {msg.result.includes("scam") && (
+                    <Button
+                      size="sm"
+                      className="bg-red-500 text-white hover:bg-red-600"
+                      onClick={() => reportScam(msg.content)}
+                    >
+                      Report to Authorities
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {reportStatus && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="fixed bottom-6 bg-blue-600 text-white px-6 py-3 rounded shadow-md"
+            >
+              {reportStatus}
+            </motion.div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
